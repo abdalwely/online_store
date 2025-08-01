@@ -831,7 +831,13 @@ document.getElementById('logoUpload').addEventListener('change', async function(
 
 // Store Preview Function
 function previewStore() {
-    const storeUrl = `${window.location.origin}/store.html?id=${currentStore}`;
+    // استخراج اسم الريبو تلقائياً من المسار الحالي إذا كان الموقع في مجلد فرعي (مثل /online_store/)
+    let repo = '';
+    const pathParts = window.location.pathname.split('/').filter(Boolean);
+    if (pathParts.length > 0 && pathParts[0] !== 'store.html') {
+        repo = '/' + pathParts[0];
+    }
+    const storeUrl = `${window.location.origin}${repo}/store.html?id=${currentStore}`;
     window.open(storeUrl, '_blank');
 }
 
