@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>متجر إلكتروني</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&family=Almarai:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/store-advanced.css">
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- Loading Screen -->
+        <div id="loading" class="loading-screen">
+            <div class="loader"></div>
+            <p>جاري تحميل المتجر...</p>
+        </div>
+
+        <!-- Language Selector -->
+        <div id="languageSelector" class="language-selector">
+            <select id="languageSelect" onchange="changeLanguage(this.value)">
+                <option value="ar">العربية</option>
+                <option value="en">English</option>
+            </select>
+        </div>
+
+        <!-- Store Frontend -->
+        <div id="storeFrontend" class="page store-page active">
+            <!-- Header -->
+            <header class="store-header" id="storeHeader">
+                <div class="header-top">
+                    <div class="container">
+                        <div class="header-info">
+                            <span class="contact-info">
+                                <i class="icon">📞</i>
+                                <span id="headerPhone">+966 50 123 4567</span>
+                            </span>
+                            <span class="contact-info">
+                                <i class="icon">📧</i>
+                                <span id="headerEmail">info@store.com</span>
+                            </span>
+                        </div>
+                        <div class="header-actions">
+                            <div class="language-toggle">
+                                <button onclick="toggleLanguage()" class="lang-btn">
+                                    <span id="currentLang">العربية</span>
+                                </button>
+                            </div>
+                            <div class="social-links">
+                                <a href="#" class="social-link" title="واتساب"><span>💬</span></a>
+                                <a href="#" class="social-link" title="تويتر"><span>🐦</span></a>
+                                <a href="#" class="social-link" title="انستغرام"><span>📷</span></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="header-main">
+                    <div class="container">
+                        <div class="store-nav">
+                            <div class="store-logo">
+                                <img id="storeLogoImg" src="" alt="شعار المتجر" style="display: none;">
+                                <h1 id="storeTitle">متجري</h1>
+                            </div>
+                            
+                            <nav class="store-menu" id="storeMenu">
+                                <a href="#home" class="menu-item active" data-i18n="home">الرئيسية</a>
+                                <a href="#categories" class="menu-item" data-i18n="categories">الأقسام</a>
+                                <a href="#products" class="menu-item" data-i18n="products">المنتجات</a>
+                                <a href="#offers" class="menu-item" data-i18n="offers">العروض</a>
+                                <a href="#about" class="menu-item" data-i18n="about">من نحن</a>
+                                <a href="#contact" class="menu-item" data-i18n="contact">اتصل بنا</a>
+                            </nav>
+                            
+                            <div class="store-actions">
+                                <div class="search-toggle">
+                                    <button onclick="toggleSearch()" class="search-btn">
+                                        <span>🔍</span>
+                                    </button>
+                                </div>
+                                
+                                <div class="wishlist-btn" onclick="showWishlist()">
+                                    <span class="wishlist-icon">❤️</span>
+                                    <span class="wishlist-count" id="wishlistCount">0</span>
+                                </div>
+                                
+                                <button class="cart-btn" onclick="showCart()">
+                                    <span class="cart-icon">🛒</span>
+                                    <span class="cart-count" id="cartCount">0</span>
+                                </button>
+                                
+                                <div class="user-menu">
+                                    <button class="user-btn" onclick="toggleUserMenu()">
+                                        <span class="user-icon">👤</span>
+                                        <span id="userName" data-i18n="login">تسجيل الدخول</span>
+                                    </button>
+                                    <div class="user-dropdown" id="userDropdown">
+                                        <a href="#" onclick="showCustomerLogin()" data-i18n="login">تسجيل الدخول</a>
+                                        <a href="#" onclick="showCustomerRegister()" data-i18n="register">إنشاء حساب</a>
+                                        <a href="#" onclick="showMyOrders()" data-i18n="my_orders">طلباتي</a>
+                                        <a href="#" onclick="showProfileItem()" data-i18n="profile">الملف الشخصي</a>
+                                        <a href="#" onclick="customerLogout()" data-i18n="logout" style="display: none;">تسجيل الخروج</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Search Bar -->
+                <div class="search-bar" id="searchBar">
+                    <div class="container">
+                        <div class="search-form">
+                            <input type="text" id="globalSearchInput" placeholder="ابحث عن المنتجات..." data-i18n-placeholder="search_products">
+                            <button onclick="performSearch()" class="search-submit">
+                                <span>🔍</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="store-main">
+                <!-- Hero Section -->
+                <section class="store-hero" id="home">
+                    <div class="hero-slider">
+                        <div class="hero-slide active">
+                            <div class="hero-background" id="heroBackground"></div>
+                            <div class="hero-content">
+                                <div class="container">
+                                    <div class="hero-text">
+                                        <h1 id="heroTitle" data-i18n="hero_title">مرحباً بك في متجرنا</h1>
+                                        <p id="heroSubtitle" data-i18n="hero_subtitle">اكتشف أفضل المنتجات بأسعار مميزة</p>
+                                        <div class="hero-buttons">
+                                            <button class="btn btn-primary btn-large" onclick="scrollToProducts()" data-i18n="shop_now">تسوق الآن</button>
+                                            <button class="btn btn-outline btn-large" onclick="scrollToOffers()" data-i18n="view_offers">عرض العروض</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Hero Features -->
+                    <div class="hero-features">
+                        <div class="container">
+                            <div class="features-grid">
+                                <div class="feature-item">
+                                    <div class="feature-icon">🚚</div>
+                                    <div class="feature-text">
+                                        <h4 data-i18n="free_shipping">شحن مجاني</h4>
+                                        <p data-i18n="free_shipping_desc">للطلبات أكثر من 200 ريال</p>
+                                    </div>
+                                </div>
+                                <div class="feature-item">
+                                    <div class="feature-icon">🔄</div>
+                                    <div class="feature-text">
+                                        <h4 data-i18n="easy_return">إرجاع سهل</h4>
+                                        <p data-i18n="easy_return_desc">خلال 14 يوم من الشراء</p>
+                                    </div>
+                                </div>
+                                <div class="feature-item">
+                                    <div class="feature-icon">💳</div>
+                                    <div class="feature-text">
+                                        <h4 data-i18n="secure_payment">دفع آمن</h4>
+                                        <p data-i18n="secure_payment_desc">طرق دفع متعددة وآمنة</p>
+                                    </div>
+                                </div>
+                                <div class="feature-item">
+                                    <div class="feature-icon">📞</div>
+                                    <div class="feature-text">
+                                        <h4 data-i18n="support_247">دعم 24/7</h4>
+                                        <p data-i18n="support_247_desc">خدمة عملاء متاحة دائماً</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Flash Sale Section -->
+                <section class="flash-sale-section" id="flashSale" style="display: none;">
+                    <div class="container">
+                        <div class="flash-sale-header">
+                            <h2 data-i18n="flash_sale">عرض محدود</h2>
+                            <div class="countdown-timer" id="countdownTimer">
+                                <div class="time-unit">
+                                    <span class="time-value" id="hours">00</span>
+                                    <span class="time-label" data-i18n="hours">ساعة</span>
+                                </div>
+                                <div class="time-unit">
+                                    <span class="time-value" id="minutes">00</span>
+                                    <span class="time-label" data-i18n="minutes">دقيقة</span>
+                                </div>
+                                <div class="time-unit">
+                                    <span class="time-value" id="seconds">00</span>
+                                    <span class="time-label" data-i18n="seconds">ثانية</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flash-sale-products" id="flashSaleProducts">
+                            <!-- Flash sale products will be loaded here -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Categories Section -->
+                <section class="categories-section" id="categories">
+                    <div class="container">
+                        <div class="section-header">
+                            <h2 data-i18n="categories">الأقسام</h2>
+                            <p data-i18n="categories_desc">تصفح منتجاتنا حسب الفئات</p>
+                        </div>
+                        <div class="categories-grid" id="categoriesGrid">
+                            <!-- Dynamic categories -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Featured Products Section -->
+                <section class="featured-products-section">
+                    <div class="container">
+                        <div class="section-header">
+                            <h2 data-i18n="featured_products">المنتجات المميزة</h2>
+                            <p data-i18n="featured_products_desc">أفضل منتجاتنا المختارة خصيصاً لك</p>
+                        </div>
+                        <div class="products-grid" id="featuredProductsGrid">
+                            <!-- Featured products will be loaded here -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Products Section -->
+                <section class="products-section" id="products">
+                    <div class="container">
+                        <div class="section-header">
+                            <h2 data-i18n="all_products">جميع المنتجات</h2>
+                            <div class="products-controls">
+                                <div class="products-filters">
+                                    <select id="categoryFilter" data-i18n-option="all_categories">
+                                        <option value="">جميع الأقسام</option>
+                                    </select>
+                                    <select id="priceFilter" data-i18n-option="all_prices">
+                                        <option value="">جميع الأسعار</option>
+                                        <option value="0-50">0 - 50 ريال</option>
+                                        <option value="50-100">50 - 100 ريال</option>
+                                        <option value="100-200">100 - 200 ريال</option>
+                                        <option value="200-500">200 - 500 ريال</option>
+                                        <option value="500+">أكثر من 500 ريال</option>
+                                    </select>
+                                    <select id="sortFilter">
+                                        <option value="newest" data-i18n="sort_newest">الأحدث</option>
+                                        <option value="price_low" data-i18n="sort_price_low">السعر: من الأقل للأعلى</option>
+                                        <option value="price_high" data-i18n="sort_price_high">السعر: من الأعلى للأقل</option>
+                                        <option value="name" data-i18n="sort_name">الاسم</option>
+                                        <option value="rating" data-i18n="sort_rating">التقييم</option>
+                                    </select>
+                                </div>
+                                <div class="view-toggle">
+                                    <button class="view-btn active" data-view="grid" onclick="changeView('grid')">
+                                        <span>⊞</span>
+                                    </button>
+                                    <button class="view-btn" data-view="list" onclick="changeView('list')">
+                                        <span>☰</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="products-grid" id="storeProductsGrid">
+                            <!-- Dynamic products -->
+                        </div>
+                        <div class="load-more-section">
+                            <button class="btn btn-outline" id="loadMoreBtn" onclick="loadMoreProducts()" data-i18n="load_more">تحميل المزيد</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Offers Section -->
+                <section class="offers-section" id="offers">
+                    <div class="container">
+                        <div class="section-header">
+                            <h2 data-i18n="special_offers">العروض الخاصة</h2>
+                            <p data-i18n="special_offers_desc">لا تفوت هذه العروض المحدودة</p>
+                        </div>
+                        <div class="offers-grid" id="offersGrid">
+                            <!-- Offers will be loaded here -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- About Section -->
+                <section class="about-section" id="about">
+                    <div class="container">
+                        <div class="about-content">
+                            <div class="about-text">
+                                <h2 data-i18n="about_us">من نحن</h2>
+                                <p id="aboutDescription" data-i18n="about_description">نحن متجر إلكتروني متخصص في تقديم أفضل المنتجات بأسعار تنافسية وخدمة عملاء ممتازة.</p>
+                                <div class="about-stats">
+                                    <div class="stat-item">
+                                        <div class="stat-number" id="happyCustomers">1000+</div>
+                                        <div class="stat-label" data-i18n="happy_customers">عميل سعيد</div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-number" id="productsCount">500+</div>
+                                        <div class="stat-label" data-i18n="products_available">منتج متاح</div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-number" id="yearsExperience">5+</div>
+                                        <div class="stat-label" data-i18n="years_experience">سنوات خبرة</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="about-image">
+                                <img id="aboutImage" src="https://images.pexels.com/photos/3965545/pexels-photo-3965545.jpeg" alt="من نحن">
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Testimonials Section -->
+                <section class="testimonials-section">
+                    <div class="container">
+                        <div class="section-header">
+                            <h2 data-i18n="customer_reviews">آراء العملاء</h2>
+                            <p data-i18n="customer_reviews_desc">ماذا يقول عملاؤنا عنا</p>
+                        </div>
+                        <div class="testimonials-slider" id="testimonialsSlider">
+                            <div class="testimonial-item">
+                                <div class="testimonial-content">
+                                    <div class="testimonial-stars">★★★★★</div>
+                                    <p>"خدمة ممتازة ومنتجات عالية الجودة. أنصح بالتعامل معهم."</p>
+                                    <div class="testimonial-author">
+                                        <strong>أحمد محمد</strong>
+                                        <span>عميل مميز</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="testimonial-item">
+                                <div class="testimonial-content">
+                                    <div class="testimonial-stars">★★★★★</div>
+                                    <p>"سرعة في التوصيل وأسعار مناسبة. تجربة تسوق رائعة."</p>
+                                    <div class="testimonial-author">
+                                        <strong>فاطمة أحمد</strong>
+                                        <span>عميلة دائمة</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Contact Section -->
+                <section class="contact-section" id="contact">
+                    <div class="container">
+                        <div class="section-header">
+                            <h2 data-i18n="contact_us">تواصل معنا</h2>
+                            <p data-i18n="contact_us_desc">نحن هنا لمساعدتك في أي وقت</p>
+                        </div>
+                        <div class="contact-content">
+                            <div class="contact-info">
+                                <div class="contact-item">
+                                    <div class="contact-icon">📞</div>
+                                    <div class="contact-details">
+                                        <h4 data-i18n="phone">الهاتف</h4>
+                                        <p id="contactPhone">+966 50 123 4567</p>
+                                    </div>
+                                </div>
+                                <div class="contact-item">
+                                    <div class="contact-icon">📧</div>
+                                    <div class="contact-details">
+                                        <h4 data-i18n="email">البريد الإلكتروني</h4>
+                                        <p id="contactEmail">info@store.com</p>
+                                    </div>
+                                </div>
+                                <div class="contact-item">
+                                    <div class="contact-icon">📍</div>
+                                    <div class="contact-details">
+                                        <h4 data-i18n="address">العنوان</h4>
+                                        <p id="contactAddress">الرياض، المملكة العربية السعودية</p>
+                                    </div>
+                                </div>
+                                <div class="contact-item">
+                                    <div class="contact-icon">🕒</div>
+                                    <div class="contact-details">
+                                        <h4 data-i18n="working_hours">ساعات العمل</h4>
+                                        <p data-i18n="working_hours_desc">السبت - الخميس: 9:00 ص - 10:00 م</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="contact-form">
+                                <h3 data-i18n="send_message">أرسل لنا رسالة</h3>
+                                <form id="contactForm">
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <input type="text" name="name" placeholder="الاسم" required data-i18n-placeholder="name">
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="email" name="email" placeholder="البريد الإلكتروني" required data-i18n-placeholder="email">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="text" name="subject" placeholder="الموضوع" required data-i18n-placeholder="subject">
+                                    </div>
+                                    <div class="form-group">
+                                        <textarea name="message" placeholder="الرسالة" rows="5" required data-i18n-placeholder="message"></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary" data-i18n="send_message">إرسال الرسالة</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+
+            <!-- Footer -->
+            <footer class="store-footer">
+                <div class="footer-main">
+                    <div class="container">
+                        <div class="footer-content">
+                            <div class="footer-section">
+                                <h3 id="footerStoreName">متجري</h3>
+                                <p id="footerStoreDescription">وصف المتجر</p>
+                                <div class="social-links">
+                                    <a href="#" class="social-link" title="فيسبوك">📘</a>
+                                    <a href="#" class="social-link" title="انستغرام">📷</a>
+                                    <a href="#" class="social-link" title="تويتر">🐦</a>
+                                    <a href="#" class="social-link" title="واتساب">💬</a>
+                                    <a href="#" class="social-link" title="سناب شات">👻</a>
+                                </div>
+                            </div>
+                            <div class="footer-section">
+                                <h4 data-i18n="quick_links">روابط سريعة</h4>
+                                <ul>
+                                    <li><a href="#products" data-i18n="products">المنتجات</a></li>
+                                    <li><a href="#categories" data-i18n="categories">الأقسام</a></li>
+                                    <li><a href="#offers" data-i18n="offers">العروض</a></li>
+                                    <li><a href="#about" data-i18n="about">من نحن</a></li>
+                                    <li><a href="#contact" data-i18n="contact">اتصل بنا</a></li>
+                                </ul>
+                            </div>
+                            <div class="footer-section">
+                                <h4 data-i18n="customer_service">خدمة العملاء</h4>
+                                <ul>
+                                    <li><a href="#" data-i18n="faq">الأسئلة الشائعة</a></li>
+                                    <li><a href="#" data-i18n="return_policy">سياسة الإرجاع</a></li>
+                                    <li><a href="#" data-i18n="payment_methods">طرق الدفع</a></li>
+                                    <li><a href="#" data-i18n="shipping_delivery">الشحن والتوصيل</a></li>
+                                    <li><a href="#" data-i18n="privacy_policy">سياسة الخصوصية</a></li>
+                                </ul>
+                            </div>
+                            <div class="footer-section">
+                                <h4 data-i18n="contact_info">معلومات التواصل</h4>
+                                <div class="footer-contact">
+                                    <p><span>📞</span> <span id="footerStorePhone">الهاتف: </span></p>
+                                    <p><span>📧</span> <span id="footerStoreEmail">البريد: </span></p>
+                                    <p><span>📍</span> <span id="footerStoreAddress">العنوان: </span></p>
+                                </div>
+                                <div class="newsletter">
+                                    <h5 data-i18n="newsletter">النشرة البريدية</h5>
+                                    <form class="newsletter-form">
+                                        <input type="email" placeholder="بريدك الإلكتروني" data-i18n-placeholder="your_email">
+                                        <button type="submit" data-i18n="subscribe">اشترك</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <div class="container">
+                        <div class="footer-bottom-content">
+                            <p>&copy; 2024 <span id="footerCopyright">جميع الحقوق محفوظة</span></p>
+                            <p data-i18n="powered_by">تم التطوير بواسطة <a href="#" target="_blank">منصة المتاجر</a></p>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+
+        <!-- Modals -->
+        
+        <!-- Customer Login Modal -->
+        <div id="customerLoginModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 data-i18n="customer_login">تسجيل دخول العميل</h2>
+                    <button class="close" onclick="closeModal('customerLoginModal')">&times;</button>
+                </div>
+                <form id="customerLoginForm" class="auth-form">
+                    <div class="form-group">
+                        <label data-i18n="email">البريد الإلكتروني</label>
+                        <input type="email" id="customerEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="password">كلمة المرور</label>
+                        <input type="password" id="customerPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox">
+                            <input type="checkbox" id="rememberMe">
+                            <span data-i18n="remember_me">تذكرني</span>
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full" data-i18n="login">تسجيل الدخول</button>
+                    <div class="auth-divider">
+                        <span data-i18n="or">أو</span>
+                    </div>
+                    <button type="button" class="btn btn-google btn-full" onclick="loginWithGoogle()">
+                        <span>🔍</span>
+                        <span data-i18n="login_google">تسجيل الدخول بجوجل</span>
+                    </button>
+                    <p class="auth-switch">
+                        <span data-i18n="no_account">ليس لديك حساب؟</span>
+                        <button type="button" onclick="showCustomerRegister()" data-i18n="create_account">إنشاء حساب</button>
+                    </p>
+                    <p class="auth-switch">
+                        <button type="button" onclick="showForgotPassword()" data-i18n="forgot_password">نسيت كلمة المرور؟</button>
+                    </p>
+                </form>
+            </div>
+        </div>
+
+        <!-- Customer Register Modal -->
+        <div id="customerRegisterModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 data-i18n="create_account">إنشاء حساب عميل</h2>
+                    <button class="close" onclick="closeModal('customerRegisterModal')">&times;</button>
+                </div>
+                <form id="customerRegisterForm" class="auth-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label data-i18n="first_name">الاسم الأول</label>
+                            <input type="text" id="customerFirstName" required>
+                        </div>
+                        <div class="form-group">
+                            <label data-i18n="last_name">الاسم الأخير</label>
+                            <input type="text" id="customerLastName" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="email">البريد الإلكتروني</label>
+                        <input type="email" id="customerRegEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="phone">رقم الهاتف</label>
+                        <input type="tel" id="customerPhone" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label data-i18n="password">كلمة المرور</label>
+                            <input type="password" id="customerRegPassword" required>
+                        </div>
+                        <div class="form-group">
+                            <label data-i18n="confirm_password">تأكيد كلمة المرور</label>
+                            <input type="password" id="customerConfirmPassword" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox">
+                            <input type="checkbox" id="agreeTerms" required>
+                            <span data-i18n="agree_terms">أوافق على الشروط والأحكام</span>
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full" data-i18n="create_account">إنشاء الحساب</button>
+                    <p class="auth-switch">
+                        <span data-i18n="have_account">لديك حساب؟</span>
+                        <button type="button" onclick="showCustomerLogin()" data-i18n="login">تسجيل الدخول</button>
+                    </p>
+                </form>
+            </div>
+        </div>
+
+        <!-- Shopping Cart Modal -->
+        <div id="cartModal" class="modal large">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 data-i18n="shopping_cart">سلة التسوق</h2>
+                    <button class="close" onclick="closeModal('cartModal')">&times;</button>
+                </div>
+                <div class="cart-content">
+                    <div id="cartItems" class="cart-items">
+                        <!-- Dynamic cart items -->
+                    </div>
+                    <div class="cart-summary">
+                        <div class="coupon-section">
+                            <h4 data-i18n="discount_coupon">كوبون الخصم</h4>
+                            <div class="coupon-input">
+                                <input type="text" id="couponCode" placeholder="أدخل كود الكوبون" data-i18n-placeholder="enter_coupon">
+                                <button class="btn btn-outline" onclick="applyCoupon()" data-i18n="apply">تطبيق</button>
+                            </div>
+                        </div>
+                        <div class="summary-details">
+                            <div class="summary-row">
+                                <span data-i18n="subtotal">المجموع الفرعي:</span>
+                                <span id="subtotal">0 ر.س</span>
+                            </div>
+                            <div class="summary-row" id="discountRow" style="display: none;">
+                                <span data-i18n="discount">الخصم:</span>
+                                <span id="discountAmount">0 ر.س</span>
+                            </div>
+                            <div class="summary-row">
+                                <span data-i18n="shipping">الشحن:</span>
+                                <span id="shippingCost">مجاني</span>
+                            </div>
+                            <div class="summary-row" id="taxRow" style="display: none;">
+                                <span data-i18n="tax">الضريبة:</span>
+                                <span id="taxAmount">0 ر.س</span>
+                            </div>
+                            <div class="summary-row total">
+                                <span data-i18n="total">المجموع:</span>
+                                <span id="totalAmount">0 ر.س</span>
+                            </div>
+                        </div>
+                        <div class="cart-actions">
+                            <button class="btn btn-outline btn-full" onclick="continueShopping()" data-i18n="continue_shopping">متابعة التسوق</button>
+                            <button class="btn btn-primary btn-full" onclick="proceedToCheckout()" data-i18n="checkout">إتمام الطلب</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Wishlist Modal -->
+        <div id="wishlistModal" class="modal large">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 data-i18n="wishlist">المفضلة</h2>
+                    <button class="close" onclick="closeModal('wishlistModal')">&times;</button>
+                </div>
+                <div class="wishlist-content">
+                    <div id="wishlistItems" class="wishlist-items">
+                        <!-- Dynamic wishlist items -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Details Modal -->
+        <div id="productModal" class="modal extra-large">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button class="close" onclick="closeModal('productModal')">&times;</button>
+                </div>
+                <div class="product-details">
+                    <div class="product-gallery">
+                        <div class="main-image">
+                            <img id="productModalImage" src="" alt="">
+                            <div class="image-zoom" id="imageZoom"></div>
+                        </div>
+                        <div class="thumbnail-images" id="thumbnailImages">
+                            <!-- Thumbnail images will be loaded here -->
+                        </div>
+                    </div>
+                    <div class="product-info">
+                        <div class="product-badges" id="productBadges">
+                            <!-- Product badges (new, sale, etc.) -->
+                        </div>
+                        <h2 id="productModalName"></h2>
+                        <div class="product-rating">
+                            <div class="stars" id="productStars">
+                                <span class="star">★</span>
+                                <span class="star">★</span>
+                                <span class="star">★</span>
+                                <span class="star">★</span>
+                                <span class="star">☆</span>
+                            </div>
+                            <span class="rating-text" id="productRating">(4.5) 24 تقييم</span>
+                        </div>
+                        <div class="product-price">
+                            <span id="productModalPrice" class="current-price"></span>
+                            <span id="productModalOriginalPrice" class="original-price"></span>
+                            <span id="discountPercentage" class="discount-badge"></span>
+                        </div>
+                        <div class="product-availability">
+                            <span class="stock-status" id="stockStatus">متوفر في المخزون</span>
+                            <span class="stock-count" id="stockCount"></span>
+                        </div>
+                        <p id="productModalDescription" class="product-description"></p>
+                        
+                        <!-- Product Options -->
+                        <div class="product-options" id="productOptions">
+                            <!-- Size options -->
+                            <div class="option-group" id="sizeOptions" style="display: none;">
+                                <label data-i18n="size">الحجم:</label>
+                                <div class="size-selector">
+                                    <!-- Size buttons will be added dynamically -->
+                                </div>
+                            </div>
+                            
+                            <!-- Color options -->
+                            <div class="option-group" id="colorOptions" style="display: none;">
+                                <label data-i18n="color">اللون:</label>
+                                <div class="color-selector">
+                                    <!-- Color buttons will be added dynamically -->
+                                </div>
+                            </div>
+                            
+                            <!-- Quantity selector -->
+                            <div class="option-group">
+                                <label data-i18n="quantity">الكمية:</label>
+                                <div class="quantity-controls">
+                                    <button type="button" onclick="changeQuantity(-1)">-</button>
+                                    <input type="number" id="productQuantity" value="1" min="1">
+                                    <button type="button" onclick="changeQuantity(1)">+</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="product-actions">
+                            <button class="btn btn-primary btn-large" onclick="addToCart()" data-i18n="add_to_cart">إضافة للسلة</button>
+                            <button class="btn btn-outline btn-large" onclick="buyNow()" data-i18n="buy_now">اشترِ الآن</button>
+                            <button class="btn btn-wishlist" onclick="toggleWishlist()" id="wishlistBtn">
+                                <span class="wishlist-icon">❤️</span>
+                            </button>
+                            <button class="btn btn-share" onclick="shareProduct()" data-i18n="share">مشاركة</button>
+                        </div>
+                        
+                        <div class="product-features">
+                            <div class="feature">
+                                <span class="feature-icon">🚚</span>
+                                <span data-i18n="free_shipping_over">شحن مجاني للطلبات أكثر من 200 ريال</span>
+                            </div>
+                            <div class="feature">
+                                <span class="feature-icon">🔄</span>
+                                <span data-i18n="return_policy_14">إمكانية الإرجاع خلال 14 يوم</span>
+                            </div>
+                            <div class="feature">
+                                <span class="feature-icon">✅</span>
+                                <span data-i18n="quality_guarantee">ضمان الجودة</span>
+                            </div>
+                            <div class="feature">
+                                <span class="feature-icon">📞</span>
+                                <span data-i18n="customer_support">دعم العملاء 24/7</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="product-tabs">
+                    <div class="tab-buttons">
+                        <button class="tab-btn active" data-tab="description" data-i18n="description">الوصف</button>
+                        <button class="tab-btn" data-tab="specifications" data-i18n="specifications">المواصفات</button>
+                        <button class="tab-btn" data-tab="reviews" data-i18n="reviews">التقييمات</button>
+                        <button class="tab-btn" data-tab="shipping" data-i18n="shipping">الشحن</button>
+                    </div>
+                    <div class="tab-content">
+                        <div id="description" class="tab-pane active">
+                            <div class="description-content">
+                                <h4 data-i18n="product_details">تفاصيل المنتج</h4>
+                                <p id="productFullDescription">وصف المنتج التفصيلي...</p>
+                            </div>
+                        </div>
+                        <div id="specifications" class="tab-pane">
+                            <div class="specifications-content">
+                                <h4 data-i18n="product_specifications">مواصفات المنتج</h4>
+                                <table class="specs-table" id="specsTable">
+                                    <!-- Specifications will be loaded here -->
+                                </table>
+                            </div>
+                        </div>
+                        <div id="reviews" class="tab-pane">
+                            <div class="reviews-section">
+                                <div class="reviews-summary">
+                                    <div class="rating-overview">
+                                        <div class="average-rating" id="averageRating">4.5</div>
+                                        <div class="stars-large" id="overallStars">★★★★☆</div>
+                                        <div class="total-reviews" id="totalReviews">24 تقييم</div>
+                                    </div>
+                                    <div class="rating-breakdown" id="ratingBreakdown">
+                                        <!-- Rating breakdown bars -->
+                                    </div>
+                                </div>
+                                <div class="reviews-list" id="reviewsList">
+                                    <!-- Reviews will be loaded here -->
+                                </div>
+                                <div class="add-review-section">
+                                    <button class="btn btn-outline" onclick="showAddReview()" data-i18n="add_review">إضافة تقييم</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="shipping" class="tab-pane">
+                            <div class="shipping-info">
+                                <h4 data-i18n="shipping_delivery_info">معلومات الشحن والتوصيل</h4>
+                                <div class="shipping-options">
+                                    <div class="shipping-option">
+                                        <h5 data-i18n="standard_shipping">الشحن العادي</h5>
+                                        <p data-i18n="standard_shipping_desc">مدة التوصيل: 3-5 أيام عمل</p>
+                                        <p data-i18n="standard_shipping_cost">التكلفة: 15 ريال (مجاني للطلبات أكثر من 200 ريال)</p>
+                                    </div>
+                                    <div class="shipping-option">
+                                        <h5 data-i18n="express_shipping">الشحن السريع</h5>
+                                        <p data-i18n="express_shipping_desc">مدة التوصيل: 1-2 أيام عمل</p>
+                                        <p data-i18n="express_shipping_cost">التكلفة: 30 ريال</p>
+                                    </div>
+                                </div>
+                                <div class="return-policy">
+                                    <h5 data-i18n="return_exchange_policy">سياسة الاستبدال والإرجاع</h5>
+                                    <ul>
+                                        <li data-i18n="return_period">إمكانية الإرجاع خلال 14 يوم من تاريخ الاستلام</li>
+                                        <li data-i18n="return_condition">يجب أن يكون المنتج في حالته الأصلية</li>
+                                        <li data-i18n="return_cost">نتحمل تكلفة الإرجاع في حالة وجود عيب في المنتج</li>
+                                        <li data-i18n="refund_period">يتم استرداد المبلغ خلال 5-7 أيام عمل</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Related Products -->
+                <div class="related-products">
+                    <h3 data-i18n="related_products">منتجات ذات صلة</h3>
+                    <div class="related-products-grid" id="relatedProductsGrid">
+                        <!-- Related products will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Checkout Modal -->
+        <div id="checkoutModal" class="modal extra-large">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 data-i18n="checkout">إتمام الطلب</h2>
+                    <button class="close" onclick="closeModal('checkoutModal')">&times;</button>
+                </div>
+                <div class="checkout-content">
+                    <div class="checkout-steps">
+                        <div class="step active" data-step="1">
+                            <span class="step-number">1</span>
+                            <span class="step-title" data-i18n="shipping_info">معلومات الشحن</span>
+                        </div>
+                        <div class="step" data-step="2">
+                            <span class="step-number">2</span>
+                            <span class="step-title" data-i18n="payment_method">طريقة الدفع</span>
+                        </div>
+                        <div class="step" data-step="3">
+                            <span class="step-number">3</span>
+                            <span class="step-title" data-i18n="order_review">مراجعة الطلب</span>
+                        </div>
+                    </div>
+                    
+                    <div class="checkout-form">
+                        <form id="checkoutForm">
+                            <!-- Step 1: Shipping Information -->
+                            <div class="checkout-step active" id="step1">
+                                <h3 data-i18n="shipping_address">عنوان الشحن</h3>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label data-i18n="first_name">الاسم الأول</label>
+                                        <input type="text" id="shippingFirstName" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label data-i18n="last_name">الاسم الأخير</label>
+                                        <input type="text" id="shippingLastName" required>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label data-i18n="phone">رقم الهاتف</label>
+                                        <input type="tel" id="shippingPhone" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label data-i18n="email">البريد الإلكتروني</label>
+                                        <input type="email" id="shippingEmail" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label data-i18n="address">العنوان</label>
+                                    <textarea id="shippingAddress" rows="3" required></textarea>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label data-i18n="city">المدينة</label>
+                                        <input type="text" id="shippingCity" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label data-i18n="postal_code">الرمز البريدي</label>
+                                        <input type="text" id="shippingPostal">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="checkbox">
+                                        <input type="checkbox" id="saveAddress">
+                                        <span data-i18n="save_address">حفظ هذا العنوان للمرات القادمة</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Step 2: Payment Method -->
+                            <div class="checkout-step" id="step2">
+                                <h3 data-i18n="payment_method">طريقة الدفع</h3>
+                                <div class="payment-methods">
+                                    <label class="payment-method">
+                                        <input type="radio" name="paymentMethod" value="COD" checked>
+                                        <div class="method-info">
+                                            <div class="method-icon">💵</div>
+                                            <div class="method-details">
+                                                <h4 data-i18n="cash_on_delivery">الدفع عند الاستلام</h4>
+                                                <p data-i18n="cash_on_delivery_desc">ادفع نقداً عند استلام الطلب</p>
+                                            </div>
+                                        </div>
+                                    </label>
+                                    <label class="payment-method">
+                                        <input type="radio" name="paymentMethod" value="CARD">
+                                        <div class="method-info">
+                                            <div class="method-icon">💳</div>
+                                            <div class="method-details">
+                                                <h4 data-i18n="online_payment">الدفع الإلكتروني</h4>
+                                                <p data-i18n="online_payment_desc">ادفع بالبطاقة الائتمانية أو mada</p>
+                                            </div>
+                                        </div>
+                                    </label>
+                                    <label class="payment-method">
+                                        <input type="radio" name="paymentMethod" value="INSTALLMENT">
+                                        <div class="method-info">
+                                            <div class="method-icon">📊</div>
+                                            <div class="method-details">
+                                                <h4 data-i18n="installment_payment">الدفع بالتقسيط</h4>
+                                                <p data-i18n="installment_payment_desc">قسط مشترياتك على 3 أو 6 أشهر</p>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                                
+                                <!-- Card Details (shown when CARD is selected) -->
+                                <div class="card-details" id="cardDetails" style="display: none;">
+                                    <h4 data-i18n="card_information">معلومات البطاقة</h4>
+                                    <div class="form-group">
+                                        <label data-i18n="card_number">رقم البطاقة</label>
+                                        <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456">
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label data-i18n="expiry_date">تاريخ الانتهاء</label>
+                                            <input type="text" id="expiryDate" placeholder="MM/YY">
+                                        </div>
+                                        <div class="form-group">
+                                            <label data-i18n="cvv">CVV</label>
+                                            <input type="text" id="cvv" placeholder="123">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label data-i18n="cardholder_name">اسم حامل البطاقة</label>
+                                        <input type="text" id="cardholderName">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Step 3: Order Review -->
+                            <div class="checkout-step" id="step3">
+                                <h3 data-i18n="order_review">مراجعة الطلب</h3>
+                                <div class="order-summary">
+                                    <div id="checkoutItems" class="checkout-items">
+                                        <!-- Order items will be populated here -->
+                                    </div>
+                                    <div class="order-notes">
+                                        <h4 data-i18n="order_notes">ملاحظات الطلب</h4>
+                                        <textarea id="orderNotes" rows="3" placeholder="أي ملاحظات إضافية للطلب (اختياري)" data-i18n-placeholder="order_notes_placeholder"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <div class="checkout-sidebar">
+                        <div class="order-summary-card">
+                            <h3 data-i18n="order_summary">ملخص الطلب</h3>
+                            <div class="summary-items" id="summaryItems">
+                                <!-- Summary items will be populated here -->
+                            </div>
+                            <div class="summary-totals">
+                                <div class="summary-row">
+                                    <span data-i18n="subtotal">المجموع الفرعي:</span>
+                                    <span id="checkoutSubtotal">0 ر.س</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span data-i18n="shipping">الشحن:</span>
+                                    <span id="checkoutShipping">0 ر.س</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span data-i18n="tax">الضريبة:</span>
+                                    <span id="checkoutTax">0 ر.س</span>
+                                </div>
+                                <div class="summary-row total">
+                                    <span data-i18n="total">المجموع النهائي:</span>
+                                    <span id="checkoutTotal">0 ر.س</span>
+                                </div>
+                            </div>
+                            <div class="checkout-actions">
+                                <button class="btn btn-outline btn-full" id="prevStepBtn" onclick="previousStep()" style="display: none;" data-i18n="previous">السابق</button>
+                                <button class="btn btn-primary btn-full" id="nextStepBtn" onclick="nextStep()" data-i18n="next">التالي</button>
+                                <button class="btn btn-success btn-full" id="submitOrderBtn" onclick="submitOrder()" style="display: none;" data-i18n="place_order">تأكيد الطلب</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- My Orders Modal -->
+        <div id="myOrdersModal" class="modal large">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 data-i18n="my_orders">طلباتي</h2>
+                    <button class="close" onclick="closeModal('myOrdersModal')">&times;</button>
+                </div>
+                <div class="orders-content">
+                    <div class="orders-filters">
+                        <select id="orderStatusFilter">
+                            <option value="" data-i18n="all_orders">جميع الطلبات</option>
+                            <option value="pending" data-i18n="pending">قيد المراجعة</option>
+                            <option value="processing" data-i18n="processing">قيد التجهيز</option>
+                            <option value="shipped" data-i18n="shipped">تم الشحن</option>
+                            <option value="delivered" data-i18n="delivered">تم التسليم</option>
+                            <option value="cancelled" data-i18n="cancelled">ملغي</option>
+                        </select>
+                    </div>
+                    <div id="customerOrders" class="customer-orders">
+                        <!-- Customer orders will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Review Modal -->
+        <div id="addReviewModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 data-i18n="add_review">إضافة تقييم</h2>
+                    <button class="close" onclick="closeModal('addReviewModal')">&times;</button>
+                </div>
+                <form id="addReviewForm" class="review-form">
+                    <div class="form-group">
+                        <label data-i18n="rating">التقييم:</label>
+                        <div class="rating-input" id="ratingInput">
+                            <span class="star" data-rating="1">☆</span>
+                            <span class="star" data-rating="2">☆</span>
+                            <span class="star" data-rating="3">☆</span>
+                            <span class="star" data-rating="4">☆</span>
+                            <span class="star" data-rating="5">☆</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="review_title">عنوان التقييم</label>
+                        <input type="text" id="reviewTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="review_comment">التعليق</label>
+                        <textarea id="reviewComment" rows="4" required></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline" onclick="closeModal('addReviewModal')" data-i18n="cancel">إلغاء</button>
+                        <button type="submit" class="btn btn-primary" data-i18n="submit_review">إرسال التقييم</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Share Product Modal -->
+        <div id="shareModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 data-i18n="share_product">مشاركة المنتج</h2>
+                    <button class="close" onclick="closeModal('shareModal')">&times;</button>
+                </div>
+                <div class="share-options">
+                    <button class="share-btn whatsapp" onclick="shareToWhatsApp()">
+                        <span>💬</span>
+                        <span data-i18n="share_whatsapp">واتساب</span>
+                    </button>
+                    <button class="share-btn twitter" onclick="shareToTwitter()">
+                        <span>🐦</span>
+                        <span data-i18n="share_twitter">تويتر</span>
+                    </button>
+                    <button class="share-btn facebook" onclick="shareToFacebook()">
+                        <span>📘</span>
+                        <span data-i18n="share_facebook">فيسبوك</span>
+                    </button>
+                    <button class="share-btn copy-link" onclick="copyProductLink()">
+                        <span>🔗</span>
+                        <span data-i18n="copy_link">نسخ الرابط</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick View Modal -->
+        <div id="quickViewModal" class="modal large">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 data-i18n="quick_view">عرض سريع</h2>
+                    <button class="close" onclick="closeModal('quickViewModal')">&times;</button>
+                </div>
+                <div class="quick-view-content">
+                    <!-- Quick view content will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Notification Toast -->
+        <div id="notificationToast" class="notification-toast">
+            <div class="toast-content">
+                <span class="toast-icon"></span>
+                <span class="toast-message"></span>
+                <button class="toast-close" onclick="hideNotification()">&times;</button>
+            </div>
+        </div>
+
+        <!-- Live Chat Widget -->
+        <div id="liveChatWidget" class="live-chat-widget">
+            <button class="chat-toggle" onclick="toggleChat()">
+                <span class="chat-icon">💬</span>
+                <span class="chat-text" data-i18n="live_chat">دردشة مباشرة</span>
+            </button>
+            <div class="chat-window" id="chatWindow">
+                <div class="chat-header">
+                    <h4 data-i18n="customer_support">دعم العملاء</h4>
+                    <button class="chat-close" onclick="toggleChat()">&times;</button>
+                </div>
+                <div class="chat-messages" id="chatMessages">
+                    <div class="chat-message bot">
+                        <span data-i18n="welcome_message">مرحباً! كيف يمكنني مساعدتك؟</span>
+                    </div>
+                </div>
+                <div class="chat-input">
+                    <input type="text" id="chatMessageInput" placeholder="اكتب رسالتك..." data-i18n-placeholder="type_message">
+                    <button onclick="sendChatMessage()" data-i18n="send">إرسال</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Back to Top Button -->
+        <button id="backToTop" class="back-to-top" onclick="scrollToTop()">
+            <span>↑</span>
+        </button>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/firebase-config.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/store-advanced.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

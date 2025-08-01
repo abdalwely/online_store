@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة المتاجر الإلكترونية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/main.css">
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- Loading Screen -->
+        <div id="loading" class="loading-screen">
+            <div class="loader"></div>
+            <p>جاري التحميل...</p>
+        </div>
+
+        <!-- Main Platform Landing -->
+        <div id="landing" class="page active">
+            <header class="landing-header">
+                <nav class="navbar">
+                    <div class="nav-brand">
+                        <h1>🏪 منصة المتاجر</h1>
+                    </div>
+                    <div class="nav-links">
+                        <button class="btn btn-outline" onclick="showLogin()">تسجيل الدخول</button>
+                        <button class="btn btn-primary" onclick="showRegister()">إنشاء حساب</button>
+                    </div>
+                </nav>
+            </header>
+
+            <main class="landing-main">
+                <section class="hero">
+                    <div class="hero-content">
+                        <h1>أنشئ متجرك الإلكتروني في دقائق</h1>
+                        <p>منصة شاملة لإنشاء وإدارة المتاجر الإلكترونية الجاهزة مع قوالب احترافية وإدارة كاملة</p>
+                        <div class="hero-buttons">
+                            <button class="btn btn-primary btn-large" onclick="showRegisterTrader()">ابدأ متجرك الآن</button>
+                            <button class="btn btn-outline btn-large" onclick="showFeatures()">استكشف المميزات</button>
+                        </div>
+                    </div>
+                    <div class="hero-image">
+                        <div class="store-preview">
+                            <div class="phone-mockup">
+                                <div class="screen">
+                                    <div class="store-header">متجر تجريبي</div>
+                                    <div class="store-products">
+                                        <div class="product-card"></div>
+                                        <div class="product-card"></div>
+                                        <div class="product-card"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="features" id="featuresSection">
+                    <div class="container">
+                        <h2>لماذا تختار منصتنا؟</h2>
+                        <div class="features-grid">
+                            <div class="feature-card">
+                                <div class="feature-icon">🎨</div>
+                                <h3>قوالب احترافية</h3>
+                                <p>مجموعة متنوعة من القوالب الجاهزة القابلة للتخصيص</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">⚡</div>
+                                <h3>سرعة في الإعداد</h3>
+                                <p>أنشئ متجرك في دقائق وابدأ البيع فوراً</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">📱</div>
+                                <h3>متجاوب تماماً</h3>
+                                <p>يعمل بكفاءة على جميع الأجهزة والشاشات</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">💳</div>
+                                <h3>دفع متعدد</h3>
+                                <p>دعم الدفع عند الاستلام والإلكتروني</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">📊</div>
+                                <h3>إحصائيات متقدمة</h3>
+                                <p>تتبع مبيعاتك وأداء متجرك بالتفصيل</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">🛡️</div>
+                                <h3>أمان عالي</h3>
+                                <p>حماية متقدمة لبيانات متجرك وعملائك</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+
+        <!-- Login Modal -->
+        <div id="loginModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>تسجيل الدخول</h2>
+                    <button class="close" onclick="closeModal('loginModal')">&times;</button>
+                </div>
+                <form id="loginForm" class="auth-form">
+                    <div class="form-group">
+                        <label>البريد الإلكتروني</label>
+                        <input type="email" id="loginEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label>كلمة المرور</label>
+                        <input type="password" id="loginPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label>نوع الحساب</label>
+                        <select id="loginType" required>
+                            <option value="">اختر نوع الحساب</option>
+                            <option value="admin">مدير المنصة</option>
+                            <option value="trader">تاجر</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">تسجيل الدخول</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Register Trader Modal -->
+        <div id="registerTraderModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>إنشاء حساب تاجر</h2>
+                    <button class="close" onclick="closeModal('registerTraderModal')">&times;</button>
+                </div>
+                <form id="registerTraderForm" class="auth-form">
+                    <div class="form-group">
+                        <label>اسم التاجر</label>
+                        <input type="text" id="traderName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>البريد الإلكتروني</label>
+                        <input type="email" id="traderEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label>كلمة المرور</label>
+                        <input type="password" id="traderPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label>اسم المتجر</label>
+                        <input type="text" id="storeName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>نوع النشاط</label>
+                        <select id="storeCategory" required>
+                            <option value="">اختر النشاط</option>
+                            <option value="fashion">أزياء</option>
+                            <option value="electronics">إلكترونيات</option>
+                            <option value="home">منزل ومطبخ</option>
+                            <option value="sports">رياضة</option>
+                            <option value="books">كتب</option>
+                            <option value="food">طعام</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">إنشاء المتجر</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Admin Dashboard -->
+        <div id="adminDashboard" class="page dashboard">
+            <header class="dashboard-header">
+                <div class="header-content">
+                    <h1>لوحة تحكم المدير</h1>
+                    <div class="header-actions">
+                        <span id="adminName" class="user-name"></span>
+                        <button class="btn btn-danger" onclick="logout()">تسجيل الخروج</button>
+                    </div>
+                </div>
+            </header>
+
+            <div class="dashboard-container">
+                <nav class="dashboard-sidebar">
+                    <ul class="sidebar-menu">
+                        <li class="active" data-tab="overview">
+                            <span class="icon">📊</span>
+                            نظرة عامة
+                        </li>
+                        <li data-tab="stores">
+                            <span class="icon">🏪</span>
+                            إدارة المتاجر
+                        </li>
+                        <li data-tab="templates">
+                            <span class="icon">🎨</span>
+                            إدارة القوالب
+                        </li>
+                        <li data-tab="plans">
+                            <span class="icon">💳</span>
+                            الخطط والاشتراكات
+                        </li>
+                        <li data-tab="users">
+                            <span class="icon">👥</span>
+                            إدارة المستخدمين
+                        </li>
+                        <li data-tab="settings">
+                            <span class="icon">⚙️</span>
+                            الإعدادات
+                        </li>
+                    </ul>
+                </nav>
+
+                <main class="dashboard-main">
+                    <!-- Overview Tab -->
+                    <div id="overview" class="tab-content active">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-icon">🏪</div>
+                                <div class="stat-info">
+                                    <h3 id="totalStores">0</h3>
+                                    <p>إجمالي المتاجر</p>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">👥</div>
+                                <div class="stat-info">
+                                    <h3 id="totalTraders">0</h3>
+                                    <p>إجمالي التجار</p>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">📦</div>
+                                <div class="stat-info">
+                                    <h3 id="totalOrders">0</h3>
+                                    <p>إجمالي الطلبات</p>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">💰</div>
+                                <div class="stat-info">
+                                    <h3 id="totalRevenue">0</h3>
+                                    <p>إجمالي الإيرادات</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="charts-section">
+                            <div class="chart-card">
+                                <h3>نمو المتاجر الشهري</h3>
+                                <div class="chart-placeholder">
+                                    <canvas id="storesChart" width="400" height="200"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stores Management Tab -->
+                    <div id="stores" class="tab-content">
+                        <div class="section-header">
+                            <h2>إدارة المتاجر</h2>
+                            <button class="btn btn-primary" onclick="showCreateStoreModal()">إنشاء متجر جديد</button>
+                        </div>
+                        
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>اسم المتجر</th>
+                                        <th>التاجر</th>
+                                        <th>الحالة</th>
+                                        <th>تاريخ الإنشاء</th>
+                                        <th>الخطة</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="storesTable">
+                                    <!-- Dynamic content -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Templates Tab -->
+                    <div id="templates" class="tab-content">
+                        <div class="section-header">
+                            <h2>إدارة القوالب</h2>
+                            <button class="btn btn-primary" onclick="showCreateTemplateModal()">إضافة قالب جديد</button>
+                        </div>
+                        
+                        <div class="templates-grid" id="templatesGrid">
+                            <!-- Dynamic templates -->
+                        </div>
+                    </div>
+
+                    <!-- Plans Tab -->
+                    <div id="plans" class="tab-content">
+                        <div class="section-header">
+                            <h2>الخطط والاشتراكات</h2>
+                            <button class="btn btn-primary" onclick="showCreatePlanModal()">إضافة خطة جديدة</button>
+                        </div>
+                        
+                        <div class="plans-grid" id="plansGrid">
+                            <!-- Dynamic plans -->
+                        </div>
+                    </div>
+
+                    <!-- Users Tab -->
+                    <div id="users" class="tab-content">
+                        <div class="section-header">
+                            <h2>إدارة المستخدمين</h2>
+                        </div>
+                        
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>الاسم</th>
+                                        <th>البريد الإلكتروني</th>
+                                        <th>النوع</th>
+                                        <th>تاريخ التسجيل</th>
+                                        <th>الحالة</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="usersTable">
+                                    <!-- Dynamic content -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Settings Tab -->
+                    <div id="settings" class="tab-content">
+                        <div class="section-header">
+                            <h2>إعدادات النظام</h2>
+                        </div>
+                        
+                        <div class="settings-form">
+                            <div class="form-section">
+                                <h3>إعدادات عامة</h3>
+                                <div class="form-group">
+                                    <label>اسم المنصة</label>
+                                    <input type="text" id="platformName" value="منصة المتاجر">
+                                </div>
+                                <div class="form-group">
+                                    <label>البريد الإلكتروني للدعم</label>
+                                    <input type="email" id="supportEmail" value="support@platform.com">
+                                </div>
+                            </div>
+                            
+                            <div class="form-section">
+                                <h3>إعدادات الدفع</h3>
+                                <div class="form-group">
+                                    <label>مفتاح Stripe</label>
+                                    <input type="text" id="stripeKey" placeholder="sk_test_...">
+                                </div>
+                                <div class="form-group">
+                                    <label>عمولة المنصة (%)</label>
+                                    <input type="number" id="platformFee" value="5" min="0" max="100">
+                                </div>
+                            </div>
+                            
+                            <button class="btn btn-primary">حفظ الإعدادات</button>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+
+        <!-- Trader Dashboard -->
+        <div id="traderDashboard" class="page dashboard trader-dashboard">
+            <header class="dashboard-header">
+                <div class="header-content">
+                    <h1>لوحة تحكم التاجر</h1>
+                    <div class="header-actions">
+                        <button class="btn btn-success" onclick="previewStore()">معاينة المتجر</button>
+                        <span id="traderName" class="user-name"></span>
+                        <button class="btn btn-danger" onclick="logout()">تسجيل الخروج</button>
+                    </div>
+                </div>
+            </header>
+
+            <div class="dashboard-container">
+                <nav class="dashboard-sidebar">
+                    <ul class="sidebar-menu">
+                        <li class="active" data-tab="dashboard">
+                            <span class="icon">📊</span>
+                            لوحة المعلومات
+                        </li>
+                        <li data-tab="products">
+                            <span class="icon">📦</span>
+                            إدارة المنتجات
+                        </li>
+                        <li data-tab="orders">
+                            <span class="icon">🛒</span>
+                            إدارة الطلبات
+                        </li>
+                        <li data-tab="customers">
+                            <span class="icon">👥</span>
+                            العملاء
+                        </li>
+                        <li data-tab="coupons">
+                            <span class="icon">🎟️</span>
+                            الكوبونات
+                        </li>
+                        <li data-tab="appearance">
+                            <span class="icon">🎨</span>
+                            المظهر
+                        </li>
+                        <li data-tab="analytics">
+                            <span class="icon">📈</span>
+                            التحليلات
+                        </li>
+                        <li data-tab="store-settings">
+                            <span class="icon">⚙️</span>
+                            إعدادات المتجر
+                        </li>
+                    </ul>
+                </nav>
+
+                <main class="dashboard-main">
+                    <!-- Dashboard Tab -->
+                    <div id="dashboard" class="tab-content active">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-icon">📦</div>
+                                <div class="stat-info">
+                                    <h3 id="traderTotalProducts">0</h3>
+                                    <p>إجمالي المنتجات</p>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">🛒</div>
+                                <div class="stat-info">
+                                    <h3 id="traderTotalOrders">0</h3>
+                                    <p>إجمالي الطلبات</p>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">👥</div>
+                                <div class="stat-info">
+                                    <h3 id="traderTotalCustomers">0</h3>
+                                    <p>إجمالي العملاء</p>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">💰</div>
+                                <div class="stat-info">
+                                    <h3 id="traderTotalRevenue">0</h3>
+                                    <p>إجمالي المبيعات</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="recent-orders">
+                            <h3>آخر الطلبات</h3>
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>رقم الطلب</th>
+                                            <th>العميل</th>
+                                            <th>المبلغ</th>
+                                            <th>الحالة</th>
+                                            <th>التاريخ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recentOrdersTable">
+                                        <!-- Dynamic content -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Products Tab -->
+                    <div id="products" class="tab-content">
+                        <div class="section-header">
+                            <h2>إدارة المنتجات</h2>
+                            <button class="btn btn-primary" onclick="showAddProductModal()">إضافة منتج جديد</button>
+                        </div>
+                        
+                        <div class="products-grid" id="productsGrid">
+                            <!-- Dynamic products -->
+                        </div>
+                    </div>
+
+                    <!-- Orders Tab -->
+                    <div id="orders" class="tab-content">
+                        <div class="section-header">
+                            <h2>إدارة الطلبات</h2>
+                        </div>
+                        
+                        <div class="orders-filters">
+                            <select id="orderStatusFilter">
+                                <option value="">جميع الحالات</option>
+                                <option value="pending">قيد المراجعة</option>
+                                <option value="processing">قيد التجهيز</option>
+                                <option value="shipped">تم الشحن</option>
+                                <option value="delivered">تم التسليم</option>
+                                <option value="cancelled">ملغي</option>
+                            </select>
+                        </div>
+                        
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>رقم الطلب</th>
+                                        <th>العميل</th>
+                                        <th>المنتجات</th>
+                                        <th>المبلغ</th>
+                                        <th>الحالة</th>
+                                        <th>التاريخ</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ordersTable">
+                                    <!-- Dynamic content -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Customers Tab -->
+                    <div id="customers" class="tab-content">
+                        <div class="section-header">
+                            <h2>إدارة العملاء</h2>
+                        </div>
+                        
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>الاسم</th>
+                                        <th>البريد الإلكتروني</th>
+                                        <th>الهاتف</th>
+                                        <th>عدد الطلبات</th>
+                                        <th>إجمالي المشتريات</th>
+                                        <th>تاريخ التسجيل</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="customersTable">
+                                    <!-- Dynamic content -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Coupons Tab -->
+                    <div id="coupons" class="tab-content">
+                        <div class="section-header">
+                            <h2>إدارة الكوبونات</h2>
+                            <div class="section-actions">
+                                <button class="btn btn-outline" onclick="showAddCouponModal()">كوبون بسيط</button>
+                                <button class="btn btn-primary" onclick="showAdvancedCouponModal()">كوبون متقدم</button>
+                            </div>
+                        </div>
+                        
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>كود الكوبون</th>
+                                        <th>نوع الخصم</th>
+                                        <th>قيمة الخصم</th>
+                                        <th>تاريخ الانتهاء</th>
+                                        <th>مرات الاستخدام</th>
+                                        <th>الحالة</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="couponsTable">
+                                    <!-- Dynamic content -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Appearance Tab -->
+                    <div id="appearance" class="tab-content">
+                        <div class="section-header">
+                            <h2>تخصيص مظهر المتجر</h2>
+                            <button class="btn btn-outline" onclick="previewStore()">معاينة المتجر</button>
+                        </div>
+                        
+                        <div class="appearance-settings">
+                            <div class="setting-section">
+                                <h3>القوالب</h3>
+                                <div class="template-selector">
+                                    <select id="templateSelector" onchange="applyStoreTheme(this.value)">
+                                        <option value="">اختر القالب</option>
+                                    </select>
+                                    <p class="help-text">اختر قالب جاهز لتطبيق تصميم متكامل على متجرك</p>
+                                </div>
+                            </div>
+                            
+                            <div class="setting-section">
+                                <h3>الألوان</h3>
+                                <div class="color-picker-group">
+                                    <div class="color-picker">
+                                        <label>اللون الأساسي</label>
+                                        <input type="color" id="primaryColor" value="#1E40AF">
+                                    </div>
+                                    <div class="color-picker">
+                                        <label>اللون الثانوي</label>
+                                        <input type="color" id="secondaryColor" value="#0891B2">
+                                    </div>
+                                    <div class="color-picker">
+                                        <label>لون الخلفية</label>
+                                        <input type="color" id="backgroundColor" value="#F8FAFC">
+                                    </div>
+                                    <div class="color-picker">
+                                        <label>لون النص</label>
+                                        <input type="color" id="textColor" value="#1E293B">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="setting-section">
+                                <h3>الشعار</h3>
+                                <div class="logo-upload">
+                                    <input type="file" id="logoUpload" accept="image/*" style="display: none;">
+                                    <button class="btn btn-outline" onclick="document.getElementById('logoUpload').click()">رفع الشعار</button>
+                                    <div id="logoPreview" class="logo-preview"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="setting-section">
+                                <h3>الخط</h3>
+                                <select id="fontFamily">
+                                    <option value="Cairo">Cairo</option>
+                                    <option value="Amiri">Amiri</option>
+                                    <option value="Tajawal">Tajawal</option>
+                                    <option value="Almarai">Almarai</option>
+                                </select>
+                            </div>
+                            
+                            <div class="setting-section">
+                                <h3>صورة الغلاف</h3>
+                                <div class="hero-image-settings">
+                                    <input type="url" id="heroImageUrl" placeholder="رابط صورة الغلاف">
+                                    <input type="file" id="heroImageUpload" accept="image/*" style="display: none;">
+                                    <button class="btn btn-outline" onclick="document.getElementById('heroImageUpload').click()">رفع صورة</button>
+                                    <div id="heroImagePreview" class="image-preview"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="setting-section">
+                                <h3>مميزات المتجر</h3>
+                                <div class="features-toggles">
+                                    <label class="checkbox">
+                                        <input type="checkbox" id="enableFlashSale">
+                                        <span>تفعيل العروض المحدودة</span>
+                                    </label>
+                                    <label class="checkbox">
+                                        <input type="checkbox" id="enableLiveChat">
+                                        <span>تفعيل الدردشة المباشرة</span>
+                                    </label>
+                                    <label class="checkbox">
+                                        <input type="checkbox" id="enableReviews">
+                                        <span>تفعيل تقييمات المنتجات</span>
+                                    </label>
+                                    <label class="checkbox">
+                                        <input type="checkbox" id="enableWishlist">
+                                        <span>تفعيل قائمة المفضلة</span>
+                                    </label>
+                                    <label class="checkbox">
+                                        <input type="checkbox" id="enableNewsletter">
+                                        <span>تفعيل النشرة البريدية</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <button class="btn btn-primary" onclick="saveAppearance()">حفظ التغييرات</button>
+                        </div>
+                    </div>
+
+                    <!-- Store Settings Tab -->
+                    <div id="store-settings" class="tab-content">
+                        <div class="section-header">
+                            <h2>إعدادات المتجر</h2>
+                        </div>
+                        
+                        <div class="settings-form">
+                            <div class="form-section">
+                                <h3>معلومات أساسية</h3>
+                                <div class="form-group">
+                                    <label>اسم المتجر</label>
+                                    <input type="text" id="settingsStoreName">
+                                </div>
+                                <div class="form-group">
+                                    <label>وصف المتجر</label>
+                                    <textarea id="storeDescription" rows="4"></textarea>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>رقم الهاتف</label>
+                                        <input type="tel" id="storePhone">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>البريد الإلكتروني</label>
+                                        <input type="email" id="storeEmail">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>الموقع الإلكتروني</label>
+                                        <input type="url" id="storeWebsite">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>رقم الهاتف</label>
+                                    <input type="tel" id="storePhone">
+                                </div>
+                                <div class="form-group">
+                                    <label>العنوان</label>
+                                    <textarea id="storeAddress" rows="3"></textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="form-section">
+                                <h3>إعدادات الشحن</h3>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>رسوم الشحن العادي</label>
+                                        <input type="number" id="shippingFee" min="0">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>رسوم الشحن السريع</label>
+                                        <input type="number" id="expressShippingFee" min="0">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>الشحن المجاني عند</label>
+                                    <input type="number" id="freeShippingThreshold" min="0">
+                                </div>
+                            </div>
+                            
+                            <div class="form-section">
+                                <h3>إعدادات الدفع</h3>
+                                <div class="checkbox-group">
+                                    <label class="checkbox">
+                                        <input type="checkbox" id="codEnabled" checked>
+                                        <span>الدفع عند الاستلام</span>
+                                    </label>
+                                    <label class="checkbox">
+                                        <input type="checkbox" id="onlinePaymentEnabled">
+                                        <span>الدفع الإلكتروني</span>
+                                    </label>
+                                    <label class="checkbox">
+                                        <input type="checkbox" id="installmentEnabled">
+                                        <span>الدفع بالتقسيط</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="form-section">
+                                <h3>إعدادات الضريبة</h3>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="checkbox">
+                                            <input type="checkbox" id="taxEnabled">
+                                            <span>تفعيل الضريبة</span>
+                                        </label>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>نسبة الضريبة (%)</label>
+                                        <input type="number" id="taxRate" min="0" max="100" value="15">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-section">
+                                <h3>إعدادات SEO</h3>
+                                <div class="form-group">
+                                    <label>عنوان الصفحة</label>
+                                    <input type="text" id="seoTitle" maxlength="60">
+                                </div>
+                                <div class="form-group">
+                                    <label>وصف الصفحة</label>
+                                    <textarea id="seoDescription" rows="3" maxlength="160"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>الكلمات المفتاحية</label>
+                                    <input type="text" id="seoKeywords" placeholder="كلمة1, كلمة2, كلمة3">
+                                </div>
+                                <div class="form-group">
+                                    <label>صورة المشاركة (Open Graph)</label>
+                                    <input type="url" id="seoOgImage">
+                                </div>
+                                <button type="button" class="btn btn-outline" onclick="updateStoreSEO()">حفظ إعدادات SEO</button>
+                            </div>
+                            
+                            <button class="btn btn-primary">حفظ الإعدادات</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Analytics Tab -->
+                    <div id="analytics" class="tab-content">
+                        <div class="section-header">
+                            <h2>تحليلات المتجر</h2>
+                            <div class="analytics-period">
+                                <select id="analyticsPeriod">
+                                    <option value="7">آخر 7 أيام</option>
+                                    <option value="30" selected>آخر 30 يوم</option>
+                                    <option value="90">آخر 3 أشهر</option>
+                                    <option value="365">آخر سنة</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="analytics-overview">
+                            <div class="analytics-cards">
+                                <div class="analytics-card">
+                                    <div class="card-icon">💰</div>
+                                    <div class="card-info">
+                                        <h3 id="totalSalesAmount">0 ر.س</h3>
+                                        <p>إجمالي المبيعات</p>
+                                        <span class="trend positive">+12%</span>
+                                    </div>
+                                </div>
+                                <div class="analytics-card">
+                                    <div class="card-icon">📦</div>
+                                    <div class="card-info">
+                                        <h3 id="totalOrdersCount">0</h3>
+                                        <p>إجمالي الطلبات</p>
+                                        <span class="trend positive">+8%</span>
+                                    </div>
+                                </div>
+                                <div class="analytics-card">
+                                    <div class="card-icon">👥</div>
+                                    <div class="card-info">
+                                        <h3 id="newCustomersCount">0</h3>
+                                        <p>عملاء جدد</p>
+                                        <span class="trend positive">+15%</span>
+                                    </div>
+                                </div>
+                                <div class="analytics-card">
+                                    <div class="card-icon">📊</div>
+                                    <div class="card-info">
+                                        <h3 id="averageOrderValue">0 ر.س</h3>
+                                        <p>متوسط قيمة الطلب</p>
+                                        <span class="trend negative">-3%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="analytics-charts">
+                            <div class="chart-container">
+                                <h3>المبيعات اليومية</h3>
+                                <canvas id="salesChart" width="800" height="300"></canvas>
+                            </div>
+                            
+                            <div class="analytics-grid">
+                                <div class="analytics-section">
+                                    <h3>أفضل المنتجات أداءً</h3>
+                                    <div id="productPerformanceList" class="performance-list">
+                                        <!-- Product performance will be loaded here -->
+                                    </div>
+                                </div>
+                                
+                                <div class="analytics-section">
+                                    <h3>إحصائيات العملاء</h3>
+                                    <div class="customer-stats">
+                                        <div class="stat-item">
+                                            <span class="stat-label">عملاء جدد:</span>
+                                            <span class="stat-value" id="newCustomersCount">0</span>
+                                        </div>
+                                        <div class="stat-item">
+                                            <span class="stat-label">عملاء عائدون:</span>
+                                            <span class="stat-value" id="returningCustomersCount">0</span>
+                                        </div>
+                                        <div class="stat-item">
+                                            <span class="stat-label">معدل الاحتفاظ:</span>
+                                            <span class="stat-value" id="retentionRate">0%</span>
+                                        </div>
+                                        <div class="stat-item">
+                                            <span class="stat-label">متوسط الطلبات لكل عميل:</span>
+                                            <span class="stat-value" id="avgOrdersPerCustomer">0</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+
+        <!-- Store Frontend -->
+        <div id="storeFrontend" class="page store-page">
+            <header class="store-header">
+                <div class="store-nav">
+                    <div class="store-logo">
+                        <img id="storeLogoImg" src="" alt="شعار المتجر" style="display: none;">
+                        <h1 id="storeTitle">متجري</h1>
+                    </div>
+                    <nav class="store-menu">
+                        <a href="#" class="active">الرئيسية</a>
+                        <a href="#">الأقسام</a>
+                        <a href="#">العروض</a>
+                        <a href="#">من نحن</a>
+                        <a href="#">اتصل بنا</a>
+                    </nav>
+                    <div class="store-actions">
+                        <button class="btn btn-outline" onclick="showCustomerLogin()">تسجيل الدخول</button>
+                        <button class="cart-btn" onclick="showCart()">
+                            <span class="cart-icon">🛒</span>
+                            <span class="cart-count" id="cartCount">0</span>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <main class="store-main">
+                <!-- Hero Section -->
+                <section class="store-hero">
+                    <div class="hero-content">
+                        <h1>مرحباً بك في متجرنا</h1>
+                        <p>اكتشف أفضل المنتجات بأسعار مميزة</p>
+                        <button class="btn btn-primary btn-large">تسوق الآن</button>
+                    </div>
+                </section>
+
+                <!-- Categories Section -->
+                <section class="categories-section">
+                    <div class="container">
+                        <h2>الأقسام</h2>
+                        <div class="categories-grid" id="categoriesGrid">
+                            <!-- Dynamic categories -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Products Section -->
+                <section class="products-section">
+                    <div class="container">
+                        <div class="section-header">
+                            <h2>المنتجات</h2>
+                            <div class="products-filters">
+                                <select id="categoryFilter">
+                                    <option value="">جميع الأقسام</option>
+                                </select>
+                                <select id="priceFilter">
+                                    <option value="">جميع الأسعار</option>
+                                    <option value="0-50">0 - 50</option>
+                                    <option value="50-100">50 - 100</option>
+                                    <option value="100-200">100 - 200</option>
+                                    <option value="200+">200+</option>
+                                </select>
+                                <input type="text" id="searchInput" placeholder="البحث في المنتجات...">
+                            </div>
+                        </div>
+                        <div class="products-grid" id="storeProductsGrid">
+                            <!-- Dynamic products -->
+                        </div>
+                    </div>
+                </section>
+            </main>
+
+            <footer class="store-footer">
+                <div class="container">
+                    <div class="footer-content">
+                        <div class="footer-section">
+                            <h3 id="footerStoreName">متجري</h3>
+                            <p id="footerStoreDescription">وصف المتجر</p>
+                        </div>
+                        <div class="footer-section">
+                            <h4>تواصل معنا</h4>
+                            <p id="footerStorePhone">الهاتف: </p>
+                            <p id="footerStoreAddress">العنوان: </p>
+                        </div>
+                        <div class="footer-section">
+                            <h4>روابط مهمة</h4>
+                            <ul>
+                                <li><a href="#">سياسة الخصوصية</a></li>
+                                <li><a href="#">شروط الاستخدام</a></li>
+                                <li><a href="#">سياسة الإرجاع</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="footer-bottom">
+                        <p>&copy; 2024 جميع الحقوق محفوظة</p>
+                    </div>
+                </div>
+            </footer>
+        </div>
+
+        <!-- Customer Login Modal -->
+        <div id="customerLoginModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>تسجيل دخول العميل</h2>
+                    <button class="close" onclick="closeModal('customerLoginModal')">&times;</button>
+                </div>
+                <form id="customerLoginForm" class="auth-form">
+                    <div class="form-group">
+                        <label>البريد الإلكتروني</label>
+                        <input type="email" id="customerEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label>كلمة المرور</label>
+                        <input type="password" id="customerPassword" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">تسجيل الدخول</button>
+                    <p class="auth-switch">ليس لديك حساب؟ <button type="button" onclick="showCustomerRegister()">إنشاء حساب</button></p>
+                </form>
+            </div>
+        </div>
+
+        <!-- Customer Register Modal -->
+        <div id="customerRegisterModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>إنشاء حساب عميل</h2>
+                    <button class="close" onclick="closeModal('customerRegisterModal')">&times;</button>
+                </div>
+                <form id="customerRegisterForm" class="auth-form">
+                    <div class="form-group">
+                        <label>الاسم الكامل</label>
+                        <input type="text" id="customerName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>البريد الإلكتروني</label>
+                        <input type="email" id="customerRegEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label>رقم الهاتف</label>
+                        <input type="tel" id="customerPhone" required>
+                    </div>
+                    <div class="form-group">
+                        <label>كلمة المرور</label>
+                        <input type="password" id="customerRegPassword" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">إنشاء الحساب</button>
+                    <p class="auth-switch">لديك حساب؟ <button type="button" onclick="showCustomerLogin()">تسجيل الدخول</button></p>
+                </form>
+            </div>
+        </div>
+
+        <!-- Shopping Cart Modal -->
+        <div id="cartModal" class="modal large">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>سلة التسوق</h2>
+                    <button class="close" onclick="closeModal('cartModal')">&times;</button>
+                </div>
+                <div class="cart-content">
+                    <div id="cartItems" class="cart-items">
+                        <!-- Dynamic cart items -->
+                    </div>
+                    <div class="cart-summary">
+                        <div class="summary-row">
+                            <span>المجموع الفرعي:</span>
+                            <span id="subtotal">0 ر.س</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>الشحن:</span>
+                            <span id="shippingCost">مجاني</span>
+                        </div>
+                        <div class="summary-row total">
+                            <span>المجموع:</span>
+                            <span id="totalAmount">0 ر.س</span>
+                        </div>
+                        <button class="btn btn-primary btn-full" onclick="proceedToCheckout()">إتمام الطلب</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Details Modal -->
+        <div id="productModal" class="modal large">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button class="close" onclick="closeModal('productModal')">&times;</button>
+                </div>
+                <div class="product-details">
+                    <div class="product-image">
+                        <img id="productModalImage" src="" alt="">
+                    </div>
+                    <div class="product-info">
+                        <h2 id="productModalName"></h2>
+                        <div class="product-price">
+                            <span id="productModalPrice" class="current-price"></span>
+                            <span id="productModalOriginalPrice" class="original-price"></span>
+                        </div>
+                        <div class="product-rating">
+                            <div class="stars">
+                                <span class="star">★</span>
+                                <span class="star">★</span>
+                                <span class="star">★</span>
+                                <span class="star">★</span>
+                                <span class="star">☆</span>
+                            </div>
+                            <span class="rating-text">(4.5) 24 تقييم</span>
+                        </div>
+                        <p id="productModalDescription" class="product-description"></p>
+                        <div class="product-options">
+                            <div class="quantity-selector">
+                                <label>الكمية:</label>
+                                <div class="quantity-controls">
+                                    <button type="button" onclick="changeQuantity(-1)">-</button>
+                                    <input type="number" id="productQuantity" value="1" min="1">
+                                    <button type="button" onclick="changeQuantity(1)">+</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="product-actions">
+                            <button class="btn btn-primary btn-large" onclick="addToCart()">إضافة للسلة</button>
+                            <button class="btn btn-outline btn-large" onclick="buyNow()">اشترِ الآن</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="product-tabs">
+                    <div class="tab-buttons">
+                        <button class="tab-btn active" data-tab="description">الوصف</button>
+                        <button class="tab-btn" data-tab="reviews">التقييمات</button>
+                        <button class="tab-btn" data-tab="shipping">الشحن</button>
+                    </div>
+                    <div class="tab-content">
+                        <div id="description" class="tab-pane active">
+                            <p id="productFullDescription">وصف المنتج التفصيلي...</p>
+                        </div>
+                        <div id="reviews" class="tab-pane">
+                            <div class="reviews-list">
+                                <div class="review-item">
+                                    <div class="review-header">
+                                        <strong>أحمد محمد</strong>
+                                        <div class="review-stars">★★★★★</div>
+                                    </div>
+                                    <p>منتج ممتاز وجودة عالية، أنصح بشرائه</p>
+                                </div>
+                                <div class="review-item">
+                                    <div class="review-header">
+                                        <strong>فاطمة أحمد</strong>
+                                        <div class="review-stars">★★★★☆</div>
+                                    </div>
+                                    <p>جيد جداً ولكن التوصيل تأخر قليلاً</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="shipping" class="tab-pane">
+                            <div class="shipping-info">
+                                <h4>معلومات الشحن</h4>
+                                <ul>
+                                    <li>الشحن مجاني للطلبات أكثر من 200 ريال</li>
+                                    <li>مدة التوصيل 2-5 أيام عمل</li>
+                                    <li>يتم الشحن من الرياض</li>
+                                    <li>خدمة الاستبدال والإرجاع متاحة خلال 14 يوم</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Product Modal -->
+        <div id="addProductModal" class="modal large">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>إضافة منتج جديد</h2>
+                    <button class="close" onclick="closeModal('addProductModal')">&times;</button>
+                </div>
+                <form id="addProductForm" class="product-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>اسم المنتج</label>
+                            <input type="text" id="productName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>الفئة</label>
+                            <select id="productCategory" required>
+                                <option value="">اختر الفئة</option>
+                                <option value="ملابس رجالية">ملابس رجالية</option>
+                                <option value="ملابس نسائية">ملابس نسائية</option>
+                                <option value="أحذية">أحذية</option>
+                                <option value="إكسسوارات">إكسسوارات</option>
+                                <option value="إلكترونيات">إلكترونيات</option>
+                                <option value="منزل ومطبخ">منزل ومطبخ</option>
+                                <option value="رياضة">رياضة</option>
+                                <option value="كتب">كتب</option>
+                                <option value="طعام">طعام</option>
+                                <option value="أطفال">أطفال</option>
+                                <option value="جمال">جمال</option>
+                                <option value="صحة">صحة</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>السعر</label>
+                            <input type="number" id="productPrice" min="0" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label>السعر الأصلي (قبل الخصم)</label>
+                            <input type="number" id="productOriginalPrice" min="0" step="0.01">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>الكمية المتوفرة</label>
+                            <input type="number" id="productStock" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label>الحد الأدنى للمخزون</label>
+                            <input type="number" id="productMinStock" min="0" value="5">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>وصف المنتج</label>
+                        <textarea id="productDescriptionInput" rows="4" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>وصف مختصر</label>
+                        <textarea id="productShortDescription" rows="2"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>الكلمات المفتاحية (مفصولة بفاصلة)</label>
+                        <input type="text" id="productTags" placeholder="كلمة1, كلمة2, كلمة3">
+                    </div>
+                    <div class="form-group">
+                        <label>صورة المنتج</label>
+                        <input type="file" id="productImage" accept="image/*" required>
+                        <div id="imagePreview" class="image-preview"></div>
+                    </div>
+                    
+                    <!-- Product Options -->
+                    <div class="form-section">
+                        <h3>خيارات المنتج</h3>
+                        <div class="form-group">
+                            <label>الأحجام المتاحة</label>
+                            <div class="checkbox-group">
+                                <label class="checkbox"><input type="checkbox" class="size-input" value="XS"><span>XS</span></label>
+                                <label class="checkbox"><input type="checkbox" class="size-input" value="S"><span>S</span></label>
+                                <label class="checkbox"><input type="checkbox" class="size-input" value="M"><span>M</span></label>
+                                <label class="checkbox"><input type="checkbox" class="size-input" value="L"><span>L</span></label>
+                                <label class="checkbox"><input type="checkbox" class="size-input" value="XL"><span>XL</span></label>
+                                <label class="checkbox"><input type="checkbox" class="size-input" value="XXL"><span>XXL</span></label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>الألوان المتاحة</label>
+                            <div class="checkbox-group">
+                                <label class="checkbox"><input type="checkbox" class="color-input" value="أبيض"><span>أبيض</span></label>
+                                <label class="checkbox"><input type="checkbox" class="color-input" value="أسود"><span>أسود</span></label>
+                                <label class="checkbox"><input type="checkbox" class="color-input" value="أحمر"><span>أحمر</span></label>
+                                <label class="checkbox"><input type="checkbox" class="color-input" value="أزرق"><span>أزرق</span></label>
+                                <label class="checkbox"><input type="checkbox" class="color-input" value="أخضر"><span>أخضر</span></label>
+                                <label class="checkbox"><input type="checkbox" class="color-input" value="رمادي"><span>رمادي</span></label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Product Status -->
+                    <div class="form-section">
+                        <h3>حالة المنتج</h3>
+                        <div class="checkbox-group">
+                            <label class="checkbox">
+                                <input type="checkbox" id="productFeatured">
+                                <span>منتج مميز</span>
+                            </label>
+                            <label class="checkbox">
+                                <input type="checkbox" id="productIsNew">
+                                <span>منتج جديد</span>
+                            </label>
+                            <label class="checkbox">
+                                <input type="checkbox" id="productOnSale">
+                                <span>في التخفيضات</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- SEO Settings -->
+                    <div class="form-section">
+                        <h3>إعدادات SEO للمنتج</h3>
+                        <div class="form-group">
+                            <label>عنوان SEO</label>
+                            <input type="text" id="productSeoTitle" maxlength="60">
+                        </div>
+                        <div class="form-group">
+                            <label>وصف SEO</label>
+                            <textarea id="productSeoDescription" rows="2" maxlength="160"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline" onclick="closeModal('addProductModal')">إلغاء</button>
+                        <button type="submit" class="btn btn-primary">إضافة المنتج</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/firebase-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/admin.js"></script>
+    <script src="js/trader.js"></script>
+   
+    <script src="js/store-advanced.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
