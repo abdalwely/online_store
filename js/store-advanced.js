@@ -2,6 +2,33 @@
 
 let currentStoreId = null;
 let currentCustomer = null;
+
+// تحميل العميل الحالي من التخزين المحلي الخاص بالمتجر
+function loadCurrentCustomer() {
+    const savedCustomer = localStorage.getItem(`customer_${currentStoreId}`);
+    if (savedCustomer) {
+        currentCustomer = JSON.parse(savedCustomer);
+    } else {
+        currentCustomer = null;
+    }
+}
+
+// حفظ العميل الحالي في التخزين المحلي الخاص بالمتجر
+function saveCurrentCustomer(customer) {
+    localStorage.setItem(`customer_${currentStoreId}` , JSON.stringify(customer));
+    currentCustomer = customer;
+}
+
+// تسجيل خروج العميل من المتجر الحالي فقط
+function customerLogout() {
+    localStorage.removeItem(`customer_${currentStoreId}`);
+    currentCustomer = null;
+    showNotification('تم تسجيل الخروج بنجاح', 'success');
+    updateCartCount();
+    updateWishlistCount();
+    // أي تحديثات إضافية للواجهة
+}
+window.customerLogout = customerLogout;
 let cart = [];
 let wishlist = [];
 let storeData = null;
@@ -16,6 +43,8 @@ let flashSaleTimer = null;
 
 // Initialize store
 async function initializeStore() {
+    // تحميل العميل الحالي المخزن لهذا المتجر
+    loadCurrentCustomer();
     console.log("initializeStore started");
     try {
         showLoading('جاري تحميل المتجر...');

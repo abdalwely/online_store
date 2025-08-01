@@ -33,8 +33,19 @@ function showLogin() {
   }
   
   function getCurrentStoreId() {
-    return currentStore || 'demo-store';
+  // إذا كنا في صفحة المتجر (معاينة)، استخدم id من الرابط أو المتغير العالمي
+  if (typeof currentStoreId !== 'undefined' && currentStoreId) {
+    return currentStoreId;
   }
+  // إذا لم يكن currentStoreId معرفاً، جرب قراءة id من رابط الصفحة مباشرة
+  const urlParams = new URLSearchParams(window.location.search);
+  const idFromUrl = urlParams.get('id');
+  if (idFromUrl) {
+    return idFromUrl;
+  }
+  // وإلا استخدم currentStore من جلسة التاجر
+  return currentStore || 'demo-store';
+}
   
   async function logout() {
     try {
@@ -267,66 +278,6 @@ function showLogin() {
             .get();
   
           if (!customerDoc.exists) {
-            throw new Error('العميل غير مسجل في هذا المتجر');
-          }
-  
-          closeModal('customerLoginModal');
-          showNotification('تم تسجيل الدخول بنجاح', 'success');
-          updateStoreForLoggedCustomer(user, customerDoc.data());
-        } catch (error) {
-          console.error('Customer login error:', error);
-          showNotification('حدث خطأ في تسجيل الدخول', 'error');
-        } finally {
-          hideLoading();
-        }
-      });
-    }
-  
-    // Customer register
-    const customerRegisterForm = document.getElementById('customerRegisterForm');
-    if (customerRegisterForm) {
-      customerRegisterForm.addEventListener('submit', async function (e) {
-        e.preventDefault();
-  
-        const name = document.getElementById('customerName').value;
-        const email = document.getElementById('customerRegEmail').value;
-        const phone = document.getElementById('customerPhone').value;
-        const password = document.getElementById('customerRegPassword').value;
-  
-        if (!name || !email || !phone || !password) {
-          showNotification('يرجى ملء جميع الحقول', 'warning');
-          return;
-        }
-  
-        try {
-          showLoading();
-  
-          const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-          const user = userCredential.user;
-  
-          await db
-            .collection('stores')
-            .doc(getCurrentStoreId())
-            .collection('customers')
-            .doc(user.uid)
-            .set({
-              name,
-              email,
-              phone,
-              totalOrders: 0,
-              totalSpent: 0,
-              createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            });
-  
-          closeModal('customerRegisterModal');
-          showNotification('تم إنشاء الحساب بنجاح!', 'success');
-          updateStoreForLoggedCustomer(user, { name, email, phone });
-        } catch (error) {
-          console.error('Customer registration error:', error);
-          let errorMessage = 'حدث خطأ في إنشاء الحساب';
-  
-          if (error.code === 'auth/email-already-in-use') {
-            errorMessage = 'البريد الإلكتروني مستخدم بالفعل';
           }
   
           showNotification(errorMessage, 'error');
