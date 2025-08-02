@@ -382,6 +382,11 @@
                                     <div class="contact-details">
                                         <h4 data-i18n="address">العنوان</h4>
                                         <p id="contactAddress">الرياض، المملكة العربية السعودية</p>
+                    <button class="wishlist-btn" onclick="showWishlist()">
+                        <span class="wishlist-icon">💝</span>
+                        <span class="wishlist-count">0</span>
+                    </button>
+                    <div class="customer-info" style="display: none;"></div>
                                     </div>
                                 </div>
                                 <div class="contact-item">
@@ -1062,7 +1067,45 @@
                 </form>
             </div>
         </div>
+        
+        <div id="customerRegisterModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>إنشاء حساب عميل</h2>
+                    <button class="close">&times;</button>
+                </div>
+                <form id="customerRegisterForm" class="auth-form">
+                    <div class="form-group">
+                        <label>الاسم الكامل</label>
+                        <input type="text" id="customerRegName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>البريد الإلكتروني</label>
+                        <input type="email" id="customerRegEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label>رقم الهاتف</label>
+                        <input type="tel" id="customerRegPhone">
+                    </div>
+                    <div class="form-group">
+                        <label>كلمة المرور</label>
+                        <input type="password" id="customerRegPassword" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">إنشاء الحساب</button>
+                    <div class="auth-switch">
+                        <p>لديك حساب؟ <button type="button" onclick="showCustomerLogin()">تسجيل الدخول</button></p>
+                    </div>
+                </form>
+            </div>
+        </div>
 
+        <div id="productModal" class="modal"></div>
+        <div id="cartModal" class="modal"></div>
+        <div id="wishlistModal" class="modal"></div>
+        <div id="checkoutModal" class="modal"></div>
+        <div id="orderSuccessModal" class="modal"></div>
+        <div id="ordersModal" class="modal"></div>
+        
         <!-- Share Product Modal -->
         <div id="shareModal" class="modal">
             <div class="modal-content">
@@ -1146,6 +1189,6 @@
     <script src="js/firebase-config.js"></script>
     <script src="js/i18n.js"></script>
     <script src="js/store-advanced.js"></script>
-    <script src="js/main.js"></script>
+        <script src="js/store-advanced.js"></script>
 </body>
 </html>
