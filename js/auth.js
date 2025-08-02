@@ -278,8 +278,134 @@ function showLogin() {
             .get();
   
           if (!customerDoc.exists) {
+            // Create customer record for this store
+            const customerData = {
+              uid: user.uid,
+              email: user.email,
+              name: user.displayName || email.split('@')[0],
+              createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+              totalOrders: 0,
+              totalSpent: 0
+            };
+            
+            await db.collection('stores')
+              .doc(getCurrentStoreId())
+              .collection('customers')
+              .doc(user.uid)
+              .set(customerData);
+            
+            currentCustomer = customerData;
+          } else {
+            currentCustomer = { uid: user.uid, ...customerDoc.data() };
           }
   
+          // Save customer session for this specific store
+          setLocalStorage(`customer_${getCurrentStoreId()}`, {
+            uid: user.uid,
+            email: user.email,
+            name: currentCustomer.name
+          });
+          
+          updateStoreForLoggedCustomer(user, currentCustomer);
+          closeModal('customerLoginModal');
+          showNotification('تم تسجيل الدخول بنجاح', 'success');
+          
+        } catch (error) {
+          console.error('Customer login error:', error);
+          let errorMessage = 'حدث خطأ في تسجيل الدخول';
+          
+          switch (error.code) {
+            case 'auth/user-not-found':
+              errorMessage = 'البريد الإلكتروني غير مسجل';
+              break;
+            case 'auth/wrong-password':
+              errorMessage = 'كلمة المرور غير صحيحة';
+              break;
+            case 'auth/invalid-email':
+              errorMessage = 'البريد الإلكتروني غير صحيح';
+              break;
+          }
+          
+          showNotification(errorMessage, 'error');
+        } finally {
+          hideLoading();
+        }
+      });
+    }
+    
+    // Customer register form
+    const customerRegisterForm = document.getElementById('customerRegisterForm');
+    if (customerRegisterForm) {
+      customerRegisterForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const name = document.getElementById('customerRegName').value;
+        const email = document.getElementById('customerRegEmail').value;
+        const password = document.getElementById('customerRegPassword').value;
+        const phone = document.getElementById('customerRegPhone').value;
+        
+        if (!name || !email || !password) {
+          showNotification('يرجى ملء جميع الحقول المطلوبة', 'warning');
+          return;
+        }
+        
+        try {
+          showLoading('جاري إنشاء الحساب...');
+          
+          const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+          const user = userCredential.user;
+          
+          // Update user profile
+          await user.updateProfile({
+            displayName: name
+          });
+          
+          // Create customer record in this store
+          const customerData = {
+            uid: user.uid,
+            email: email,
+            name: name,
+            phone: phone || '',
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            totalOrders: 0,
+            totalSpent: 0
+          };
+          
+          await db.collection('stores')
+            .doc(getCurrentStoreId())
+            .collection('customers')
+            .doc(user.uid)
+            .set(customerData);
+          
+          currentCustomer = customerData;
+          
+          // Save customer session for this specific store
+          setLocalStorage(`customer_${getCurrentStoreId()}`, {
+            uid: user.uid,
+            email: email,
+            name: name
+          });
+          
+          updateStoreForLoggedCustomer(user, customerData);
+          closeModal('customerRegisterModal');
+          showNotification('تم إنشاء الحساب بنجاح', 'success');
+          
+        } catch (error) {
+          console.error('Customer register error:', error);
+          let errorMessage = 'حدث خطأ في إنشاء الحساب';
+          
+          switch (error.code) {
+            case 'auth/email-already-in-use':
+              errorMessage = 'البريد الإلكتروني مستخدم بالفعل';
+              break;
+            case 'auth/weak-password':
+              errorMessage = 'كلمة المرور ضعيفة جداً';
+              break;
+            case 'auth/invalid-email':
+              errorMessage = 'البريد الإلكتروني غير صحيح';
+              break;
+          }
+          
           showNotification(errorMessage, 'error');
         } finally {
           hideLoading();
@@ -296,4 +422,3 @@ function showLogin() {
   window.logout = logout;
   window.showCustomerLogin = showCustomerLogin;
   window.showCustomerRegister = showCustomerRegister;
-  
